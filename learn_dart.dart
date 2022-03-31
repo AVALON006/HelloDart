@@ -48,8 +48,22 @@ void flowControl(){
   }
 }
 
+int fibonacci(int n){
+  if(n==0||n==1) return 1;
+  return fibonacci(n-1)+fibonacci(n-2);
+}
+void function(){
+  // 函数 https://dart.cn/samples#functions
+  
+  var result = fibonacci(20);
+  print('fibonacci(20)的运行结果为：$result');
+  flybyObjects.where((name)=>name.contains('turn')).forEach(print);
+  //where筛选条件是一个匿名函数，forEach对于每一个列表中的元素都调用该方法
+}
+
 void main(){  
   //helloWorld();
   //variables();
-  flowControl();
+  //flowControl();
+  function();
 }
