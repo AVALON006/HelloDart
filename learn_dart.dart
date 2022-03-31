@@ -54,12 +54,19 @@ int fibonacci(int n){
 }
 void function(){
   // 函数 https://dart.cn/samples#functions
-  
+
   var result = fibonacci(20);
   print('fibonacci(20)的运行结果为：$result');
   flybyObjects.where((name)=>name.contains('turn')).forEach(print);
   //where筛选条件是一个匿名函数，forEach对于每一个列表中的元素都调用该方法
 }
+
+// 注释 https://dart.cn/samples#comments
+
+/// 这是一个文档注释。
+/// 文档注释用于为库、类以及类的成员添加注释。
+/// 像IDE和dartdoc这样的工具可以专门处理文档注释。
+/* 也可以像这样使用单斜杠/和星号*的注释方式 */
 
 void main(){  
   //helloWorld();
