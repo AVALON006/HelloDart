@@ -18,7 +18,38 @@ void variables(){
   print('name is $name, year is $year, antennaDiameter is $antennaDiameter,flybyObjects is $flybyObjects, image is $image');
 }
 
+void flowControl(){
+  // 流程控制 https://dart.cn/samples#control-flow-statements
+
+  for(final object in flybyObjects){
+  //for(var obj in flybyObjects){这样也可以输出
+    //print(obj);
+    print(object);
+  }
+
+  for(int month = 1;month <= 12;month++){
+    print(month);
+  }
+  var years = [1977,2010,2022];
+  for(year in years){
+    print('----------------------');
+    print('At first year is $year');
+    if(year >= 2001){
+      print('21st century');
+    }else if(year >= 1901){
+      print('20th century');
+    }
+
+    while(year < 2016){
+      year += 1;
+    }
+
+    print('At last year is $year');
+  }
+}
+
 void main(){  
-  helloWorld();
-  variables();
+  //helloWorld();
+  //variables();
+  flowControl();
 }
