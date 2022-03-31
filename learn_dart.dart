@@ -65,7 +65,7 @@ void function() {
   var result = fibonacci(20);
   print('fibonacci(20)的运行结果为：$result');
   flybyObjects.where((name) => name.contains('turn')).forEach(print);
-  //where筛选条件是一个匿名函数，forEach对于每一个列表中的元素都调用该方法
+  //where筛选条件是一个匿名函数（=>胖箭头），forEach对于每一个列表中的元素都调用该方法
 }
 
 // 注释 https://dart.cn/samples#comments
@@ -75,10 +75,50 @@ void function() {
 /// 像IDE和dartdoc这样的工具可以专门处理文档注释。
 /* 也可以像这样使用单斜杠/和星号*的注释方式 */
 
+class Spacecraft {
+  // 类 https://dart.cn/samples#classes
+
+  String name;
+  DateTime? launchDate;
+
+  int? get launchYear => launchDate?.year;
+  //有问号不自动检查是否为null
+
+  Spacecraft(this.name, this.launchDate) {
+    //初始化代码（构造器）
+  }
+
+  Spacecraft.unlaunched(String name) : this(name, null);
+  //这个也是一个构造器
+
+  void describe() {
+    print('Spacecraft: $name');
+    var launchDate = this.launchDate;
+    if (launchDate != null) {
+      int years = DateTime.now().difference(launchDate).inDays ~/ 365;
+      print('Launched: $launchYear ($years years ago)');
+    } else {
+      print('Unlaunched');
+    }
+  }
+}
+
+void learnClass() {
+  var launchTime1 = DateTime(1970, 4, 24, 21, 35);
+  var craft1 = Spacecraft('东方红', launchTime1);
+  var craft2 = Spacecraft.unlaunched('未发射的航天器');
+  print('Spacecraft1');
+  craft1.describe();
+  print(' ');
+  print('Spacecraft2');
+  craft2.describe();
+}
+
 void main() {
   //helloWorld();
   //variables();
   //flowControl();
   //function();
-  importTest();
+  //importTest();
+  learnClass();
 }
