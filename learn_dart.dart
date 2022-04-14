@@ -76,8 +76,6 @@ void function() {
 /* 也可以像这样使用单斜杠/和星号*的注释方式 */
 
 class Spacecraft {
-  // 类 https://dart.cn/samples#classes
-
   String name;
   DateTime? launchDate;
 
@@ -103,7 +101,16 @@ class Spacecraft {
   }
 }
 
+class Orbiter extends Spacecraft {
+  double altitude;
+
+  Orbiter(String name, DateTime launchDate, this.altitude)
+      : super(name, launchDate);
+}
+
 void learnClass() {
+  // 类 https://dart.cn/samples#classes
+  // 扩展类（继承） https://dart.cn/samples#inheritance
   var launchTime1 = DateTime(1970, 4, 24, 21, 35);
   var craft1 = Spacecraft('东方红', launchTime1);
   var craft2 = Spacecraft.unlaunched('未发射的航天器');
@@ -112,6 +119,37 @@ void learnClass() {
   print(' ');
   print('Spacecraft2');
   craft2.describe();
+  print('');
+  var orbiter = Orbiter('orbiter', launchTime1, 12.4);
+  orbiter.describe();
+  print(orbiter.altitude);
+}
+
+mixin Piloted {
+  // 添加一个功能
+  int astronauts = 1;
+
+  void describeCrew() {
+    print('Number of astronauts: $astronauts');
+  }
+}
+
+class PilotedCraft extends Spacecraft with Piloted {
+  PilotedCraft(String name, DateTime? launchDate) : super(name, launchDate);
+  PilotedCraft.unlaunched(String name) : super.unlaunched(name);
+
+  @override
+  void describe() {
+    describeCrew();
+    super.describe();
+  }
+}
+
+void learnMixins() {
+  // mixin https://dart.cn/samples#mixins
+  var pilotedCraft = PilotedCraft.unlaunched('PilotedCraft');
+  print('');
+  pilotedCraft.describe();
 }
 
 void main() {
@@ -121,4 +159,5 @@ void main() {
   //function();
   //importTest();
   learnClass();
+  learnMixins();
 }
