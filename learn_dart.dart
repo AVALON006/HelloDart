@@ -3,6 +3,7 @@
 // 导入（import） https://dart.cn/samples#imports
 //import 'dart:math';导入math库
 //import 'package:test/test.dart';导入外部包的文件
+import 'dart:io';
 import './import_test.dart';
 
 void helloWorld() {
@@ -183,6 +184,55 @@ void learnInterface() {
   mockSpaceship.describeWithEmphasis();
 }
 
+const oneSecond = Duration(seconds: 1);
+Future<void> printWithDelay1(String message) async {
+  await Future.delayed(oneSecond);
+  print(message);
+}
+
+Future<void> printWithDelay2(String message) {
+  return Future.delayed(oneSecond).then((_) {
+    print(message);
+  });
+}
+
+Future<void> createDescriptions(Iterable<String> objects) async {
+  for (final object in objects) {
+    try {
+      var file = File('$object.txt');
+      if (await file.exists()) {
+        var modified = await file.lastModified();
+        print('File for %object already exists. It was modified on $modified.');
+        continue;
+      }
+      await file.create();
+      await file.writeAsString('Start describing $object in this file.');
+    } on IOException catch (e) {
+      print('Cannot create description for $object: $e');
+    }
+  }
+}
+
+Stream<String> report(Spacecraft craft, Iterable<String> objects) async* {
+  for (final object in objects) {
+    await Future.delayed(oneSecond);
+    yield '${craft.name} flies by $object';
+  }
+}
+
+void learnAsyncAndStream() {
+  printWithDelay1('2');
+  printWithDelay2('1');
+  var objs = <String>[];
+  objs.addAll(['111', '222', '333', '444']);
+  createDescriptions(objs);
+  var craft1 = Spacecraft('东方红', DateTime(1970, 4, 24, 21, 35));
+  var craft2 = Spacecraft.unlaunched('未发射的航天器');
+  var mockSpaceship = MockSpaceship('mock');
+  var pilotedCraft = PilotedCraft.unlaunched('PilotedCraft');
+  report(craft1, objs);
+}
+
 void main() {
   //helloWorld();
   //variables();
@@ -191,5 +241,6 @@ void main() {
   //importTest();
   //learnClass();
   //learnMixins();
-  learnInterface();
+  //learnInterface();
+  learnAsyncAndStream();
 }
