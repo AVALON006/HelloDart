@@ -152,12 +152,44 @@ void learnMixins() {
   pilotedCraft.describe();
 }
 
+class MockSpaceship extends Describable implements Spacecraft {
+  @override
+  String name;
+  MockSpaceship(this.name);
+  @override
+  DateTime? launchDate;
+
+  @override
+  void describe() {
+    print('new implement describe function');
+  }
+
+  @override
+  int? get launchYear => launchDate?.year;
+}
+
+abstract class Describable {
+  void describe();
+  void describeWithEmphasis() {
+    print('=' * 10);
+    describe();
+    print('=' * 10);
+  }
+}
+
+void learnInterface() {
+  // 接口和抽象类 https://dart.cn/samples#interfaces-and-abstract-classes
+  var mockSpaceship = MockSpaceship('mock');
+  mockSpaceship.describeWithEmphasis();
+}
+
 void main() {
   //helloWorld();
   //variables();
   //flowControl();
   //function();
   //importTest();
-  learnClass();
-  learnMixins();
+  //learnClass();
+  //learnMixins();
+  learnInterface();
 }
