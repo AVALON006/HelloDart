@@ -242,7 +242,7 @@ Future<void> streamAdvance() async {
     ctl.add(value);
   }
 
-  await addWithDelay(11.1);//等11.1完成后再进行22.2
+  await addWithDelay(11.1); //等11.1完成后再进行22.2
   addWithDelay(22.2);
   addWithDelay(33.3);
 }
@@ -265,6 +265,50 @@ void learnAsyncAndStream() {
   streamAdvance();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void NotZeroError(value) {
+  if (value != 0) {
+    throw StateError('Not Zero');
+  } else {
+    print('value is $value = 0');
+  }
+}
+
+void learnError() async {
+  for (final obj in flybyObjects) {
+    var file = File('$obj.txt');
+    if (!await file.exists()) {
+      await file.create();
+      await file.writeAsString('Start describing $obj in this file');
+    }
+  }
+  try {
+    print('请输入一个数字（为0进入下一个Exception，不为0为Error测试）');
+    stdout.write('>>');
+    String? str = stdin.readLineSync();
+    if (str != null) {
+      int num = int.parse(str);
+      NotZeroError(num);
+    } else {
+      print('输入的不是数字哦~');
+    }
+    flybyObjects.addAll(['111', '222', '333', '123']);
+    for (final object in flybyObjects) {
+      var description = await File('$object.txt').readAsString();
+      print(description);
+    }
+  } on IOException catch (ex) {
+    print('Could not describe object: $ex');
+  } on StateError catch (error) {
+    print(error);
+  } on FormatException catch (ex) {
+    print('输入的不是数字哦~');
+    print(ex);
+  } finally {
+    flybyObjects.clear();
+  }
+}
+
 void main() {
   //helloWorld();
   //variables();
@@ -274,5 +318,6 @@ void main() {
   //learnClass();
   //learnMixins();
   //learnInterface();
-  learnAsyncAndStream();
+  //learnAsyncAndStream();
+  learnError();
 }
