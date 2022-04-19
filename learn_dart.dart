@@ -3,14 +3,18 @@
 // 导入（import） https://dart.cn/samples#imports
 //import 'dart:math';导入math库
 //import 'package:test/test.dart';导入外部包的文件
+import 'dart:async'; //StreamController
+import 'dart:ffi';
 import 'dart:io';
 import './import_test.dart';
 
+////////////////////////////////////////////////////////////////////////////////
 void helloWorld() {
   // 你好,世界! https://dart.cn/samples#hello-world
   print('Hello World!');
 }
 
+////////////////////////////////////////////////////////////////////////////////
 var name = 'Voyager I';
 var year = 1977;
 var antennaDiameter = 3.7;
@@ -25,6 +29,7 @@ void variables() {
       'name is $name, year is $year, antennaDiameter is $antennaDiameter,flybyObjects is $flybyObjects, image is $image');
 }
 
+////////////////////////////////////////////////////////////////////////////////
 void flowControl() {
   // 流程控制 https://dart.cn/samples#control-flow-statements
 
@@ -55,6 +60,7 @@ void flowControl() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 int fibonacci(int n) {
   if (n == 0 || n == 1) return 1;
   return fibonacci(n - 1) + fibonacci(n - 2);
@@ -68,14 +74,14 @@ void function() {
   flybyObjects.where((name) => name.contains('turn')).forEach(print);
   //where筛选条件是一个匿名函数（=>胖箭头），forEach对于每一个列表中的元素都调用该方法
 }
-
+////////////////////////////////////////////////////////////////////////////////
 // 注释 https://dart.cn/samples#comments
 
 /// 这是一个文档注释。
 /// 文档注释用于为库、类以及类的成员添加注释。
 /// 像IDE和dartdoc这样的工具可以专门处理文档注释。
 /* 也可以像这样使用单斜杠/和星号*的注释方式 */
-
+////////////////////////////////////////////////////////////////////////////////
 class Spacecraft {
   String name;
   DateTime? launchDate;
@@ -126,6 +132,7 @@ void learnClass() {
   print(orbiter.altitude);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 mixin Piloted {
   // 添加一个功能
   int astronauts = 1;
@@ -153,6 +160,7 @@ void learnMixins() {
   pilotedCraft.describe();
 }
 
+////////////////////////////////////////////////////////////////////////////////
 class MockSpaceship extends Describable implements Spacecraft {
   @override
   String name;
@@ -184,6 +192,7 @@ void learnInterface() {
   mockSpaceship.describeWithEmphasis();
 }
 
+////////////////////////////////////////////////////////////////////////////////
 const oneSecond = Duration(seconds: 1);
 Future<void> printWithDelay1(String message) async {
   await Future.delayed(oneSecond);
@@ -217,12 +226,34 @@ Stream<String> report(Spacecraft craft, Iterable<String> objects) async* {
   for (final object in objects) {
     await Future.delayed(oneSecond);
     yield '${craft.name} flies by $object';
+    //用于从流中发出值
   }
 }
 
+Future<void> streamAdvance() async {
+  StreamController<double> ctl = StreamController<double>();
+  Stream stm = ctl.stream;
+  stm.listen((event) {
+    print('event from controller is: $event');
+  });
+
+  Future<void> addWithDelay(value) async {
+    await Future.delayed(oneSecond);
+    ctl.add(value);
+  }
+
+  await addWithDelay(11.1);//等11.1完成后再进行22.2
+  addWithDelay(22.2);
+  addWithDelay(33.3);
+}
+
 void learnAsyncAndStream() {
+  // AsyncAndStream https://dart.cn/samples#async
+  // StreamAdvanced https://www.jianshu.com/p/f9af079782af
+  print('1');
   printWithDelay1('2');
-  printWithDelay2('1');
+  print('3');
+  printWithDelay2('4');
   var objs = <String>[];
   objs.addAll(['111', '222', '333', '444']);
   createDescriptions(objs);
@@ -230,7 +261,8 @@ void learnAsyncAndStream() {
   var craft2 = Spacecraft.unlaunched('未发射的航天器');
   var mockSpaceship = MockSpaceship('mock');
   var pilotedCraft = PilotedCraft.unlaunched('PilotedCraft');
-  report(craft1, objs);
+  report(craft1, objs).forEach(print);
+  streamAdvance();
 }
 
 void main() {
