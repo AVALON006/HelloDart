@@ -4,9 +4,8 @@
 //import 'dart:math';导入math库
 //import 'package:test/test.dart';导入外部包的文件
 import 'dart:async'; //StreamController
-import 'dart:ffi';
 import 'dart:io';
-import './import_test.dart';
+import './import_test.dart'; //导入成功会有importTest的函数供你使用
 
 ////////////////////////////////////////////////////////////////////////////////
 void helloWorld() {
@@ -275,6 +274,7 @@ void NotZeroError(value) {
 }
 
 void learnError() async {
+  // 异常 https://dart.cn/samples#exceptions
   for (final obj in flybyObjects) {
     var file = File('$obj.txt');
     if (!await file.exists()) {
