@@ -2,7 +2,10 @@
 
 import 'dart:collection';
 import 'dart:async';
-import 'dart:html';
+import 'dart:convert'; //提供transform方法
+import 'dart:io';
+import 'dart:math';
+//import 'dart:html';
 
 ////////////////////////////////////////////////////////////////////////////////
 // 核心库（自带） https://dart.cn/guides/libraries/library-tour#dartcore---numbers-collections-strings-and-more
@@ -288,6 +291,26 @@ void URIs() {
   assert(encoded == 'https%3A%2F%2Fexample.org%2Fapi%3Ffoo%3Dsome%20message');
   decoded = Uri.decodeComponent(encoded);
   assert(uri == decoded);
+  //这段代码刚好是数电老师发的雨课堂网址
+  //我发现这个网址复制粘贴到其它地方的时候
+  //显示的和浏览器上面显示的不一样
+  //所以我就对他进行解码
+  String url =
+      'https://www.yuketang.cn/v/index/my_collections_tofolder/collection?classroom_id=12222519&classroom_name=2020%E7%BA%A7%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF%E5%91%A8%E4%BA%8C12%E8%8A%82&course_id=3419462&foldname=%25E6%2595%25B0%25E5%25AD%2597%25E7%2594%25B5%25E8%25B7%25AF%25E6%25B5%258B%25E9%25AA%258C&id=769681&is_pro=false&status=1&type=pub';
+  String decodeFull = Uri.decodeFull(url);
+  print(decodeFull);
+  //不知道为什么第一次仅解码了前半部分的%E7%BA%A7%E6%95%B0%E5%AD%97%E7%94%B5%E8%B7%AF%E5%91%A8%E4%BA%8C12%E8%8A%82
+  var splitUri = decodeFull.split('&');
+  String foldname = splitUri[3];
+  foldname = Uri.decodeFull(foldname); //就拆分开来再一次进行解码
+  splitUri[3] = foldname;
+  //Uri.decodeFull(decodeFull);
+  //直接再解码是不行的，因为里面有汉字
+  print(splitUri.join('&'));
+  String encodeFull = Uri.encodeFull(splitUri.join('&'));
+  //后面发现解码后网址发出去没办法访问，只能又重新编码
+  assert(encodeFull != url);
+  //发现可能是foldname部分被编码了两次，所以需要解码两次
 
   var uri2 = Uri.parse('https://example.org:8080/foo/bar#frag');
 
@@ -452,58 +475,484 @@ void learnCoreLib() {
 //dart:async 异步编程 https://dart.cn/guides/libraries/library-tour#dartasync---asynchronous-programming
 //dart:async library API文档 https://api.dart.cn/stable/dart-async/dart-async-library.html
 
-Future findEntryPoint() async {
-  Future.delayed(Duration(seconds: 1));
-  print('findEntryPoint');
-  return 'entry point';
-}
-
-Future runExecutable(var entryPoint, var args) async {
-  print('runExecutable');
-  print(entryPoint);
-  print(args);
-  if (args.length == 0) {
-    return 'no args';
-  } else {
-    return 'args: ${args.join(',')}';
+void future() async {
+  //Future https://dart.cn/guides/libraries/library-tour#future
+  Future findEntryPoint(int i) async {
+    Future.delayed(Duration(seconds: 1));
+    print('findEntryPoint$i');
+    return 'entry point$i';
   }
-}
 
-void func() {
-  print('void function');
-}
+  Future runExecutable(var entryPoint, var args) async {
+    print('runExecutable');
+    print(entryPoint);
+    //print(args);
+    if (args.length == 0) {
+      return 'no args';
+    } else {
+      return 'args: ${args.join(',')}';
+    }
+  }
 
-FutureOr<dynamic> flushThenExit(void func) {
-  //void 类型表示一个值永远也不会被使用
-  print('flushThenExit');
-}
+  void func() {
+    print('void function');
+  }
 
-void runUsingFuture() {
-  findEntryPoint().then((entryPoint) async {
-    var args = ['--foo', '--bar'];
-    return runExecutable(entryPoint, args);
-  }).then(flushThenExit);
-}
+  FutureOr<dynamic> flushThenExit(void func) {
+    //void 类型表示一个值永远也不会被使用
+    print('flushThenExit');
+  }
 
-Future<void> runUsingAsyncAwait() async {
-  var entryPoint = await findEntryPoint();
-  var args = ['--foo', '--bar'];
-  var result = await runExecutable(entryPoint, args);
-  print(result);
-  await flushThenExit(result);
-}
+  void runUsingFuture() {
+    findEntryPoint(1).then((entryPoint) async {
+      var args = ['--foo1', '--bar1'];
+      var result = await runExecutable(entryPoint, args);
+      print(result);
+    }).then(flushThenExit);
+  }
 
-void learnAsyncLib() async {
+  Future<void> runUsingAsyncAwait() async {
+    var entryPoint = await findEntryPoint(2);
+    var args = ['--foo2', '--bar2'];
+    var result = await runExecutable(entryPoint, args);
+    print(result);
+    await flushThenExit(result);
+  }
+
   runUsingFuture();
   runUsingAsyncAwait();
   //加上try catch可以捕获异常
-  var url = Url.createObjectUrl('http://cn.bing.com');
-  HttpRequest.getString(url).then((String result) {
-    print(result);
+  // var url = Url.createObjectUrl('http://cn.bing.com');
+  // HttpRequest.getString(url).then((String result) {
+  //   print(result);
+  // });
+  //因为是控制台程序，所以不能运行这段代码
+
+  Future costlyQuery(var url) async {
+    Future.delayed(Duration(seconds: 1));
+    print('Query done!');
+    return 'Query done!';
+  }
+
+  Future expensiveWork(var value) async {
+    Future.delayed(Duration(seconds: 2));
+    print('Expensive work done!');
+    return 'Expensive work done!';
+  }
+
+  Future lengthyComputation() async {
+    print('Lengthy computation done!');
+  }
+
+  var url = 'https://cn.bing.com';
+  //链式异步编程
+  Future result = costlyQuery(url);
+  result
+      .then((value) => expensiveWork(value))
+      .then((_) => lengthyComputation())
+      .then((_) => print('Done!'))
+      .catchError((exception) {
+    print(exception);
   });
+  // await 等效代码
+  // try {
+  //   final value = await costlyQuery(url);
+  //   await expensiveWork(value);
+  //   await lengthyComputation();
+  //   print('Done!');
+  // } catch (e) {
+  //   print(e);
+  // }
+
+  Future<void> deleteLotsOfFiles() async => Future.delayed(Duration(seconds: 1))
+      .then((value) => print('Delete lots of files done!'));
+  Future<void> copyLotsOfFiles() async => Future.delayed(Duration(seconds: 1))
+      .then((value) => print('Copy lots of files done!'));
+  Future<void> checksumLotsOfOtherFiles() async =>
+      Future.delayed(Duration(seconds: 1))
+          .then((value) => print('Check sun lots of other files done!'));
+  await Future.wait([
+    deleteLotsOfFiles(),
+    copyLotsOfFiles(),
+    checksumLotsOfOtherFiles(),
+  ]);
+  print('Done with all the long steps!');
+}
+
+void stream() async {
+  //Stream https://dart.cn/guides/libraries/library-tour#stream
+  //异步循环 await for
+  //更多await https://dart.cn/guides/language/language-tour#asynchrony-support
+  void searchFile(String searchPath, String searchTerms) {
+    //递归循环遍历路径下所有带有searchTerms的文件
+    FileSystemEntity.isDirectory(searchPath).then((isDir) {
+      if (isDir) {
+        final startingDir = Directory(searchPath);
+        startingDir.list().listen((entity) {
+          String path = entity
+              .toString()
+              .replaceFirst('Directory: ', '')
+              .replaceAll('File: ', '')
+              .replaceAll('\'', '');
+          if (entity is Directory) {
+            searchFile(path, searchTerms);
+          } else if (entity is File) {
+            int len = path.split('\\').length;
+            String fileName = path.split('\\')[len - 1];
+            if (fileName.contains(searchTerms)) {
+              print('Find file $fileName');
+            }
+          }
+        });
+      } else {
+        searchFile(searchPath, searchTerms);
+      }
+    });
+  }
+
+  searchFile('./', 'hello');
+
+  void searchFile2(String searchPath, String searchTerms) async {
+    if (await FileSystemEntity.isDirectory(searchPath)) {
+      final startingDir = Directory(searchPath);
+      await for (final entity in startingDir.list()) {
+        String path = entity
+            .toString()
+            .replaceFirst('Directory: ', '')
+            .replaceAll('File: ', '')
+            .replaceAll('\'', '');
+        if (entity is File) {
+          int len = path.split('\\').length;
+          String fileName = path.split('\\')[len - 1];
+          if (fileName.contains(searchTerms)) {
+            print('Find file $fileName');
+          }
+        } else if (entity is Directory) {
+          searchFile2(path, searchTerms);
+        }
+      }
+    }
+  }
+
+  searchFile2('./', 'config');
+
+  //监听流数据
+  // submitButton.onClick.listen((e){
+  //   submitData();
+  // })
+  //传递流数据
+  // Stream<dynamic> inputStream = stdin;
+  // var lines =
+  //     inputStream.transform(utf8.decoder).transform(const LineSplitter());
+  //处理错误和完成
+  Future<void> readFileAwaitFor() async {
+    var config = File('config');
+    Stream<List<int>> inputStream = config.openRead();
+    var lines =
+        inputStream.transform(utf8.decoder).transform(const LineSplitter());
+    try {
+      await for (final line in lines) {
+        print('Got ${line.length} characters from stream1');
+      }
+      print('file stream1 is now closed');
+    } catch (e) {
+      print('e');
+    }
+  }
+
+  readFileAwaitFor();
+
+  Future<void> readFileAwaitFor2() async {
+    var config = File('config');
+    Stream<List<int>> inputStream = config.openRead();
+    inputStream.transform(utf8.decoder).transform(const LineSplitter()).listen(
+        (String line) {
+      print('Got ${line.length} characters from stream2');
+    }, onDone: () {
+      print('file stream2 is now closed');
+    }, onError: (e) => print('e'));
+  }
+
+  readFileAwaitFor2();
+}
+
+void learnAsyncLib() async {
+  future();
+  stream();
+}
+////////////////////////////////////////////////////////////////////////////////
+//dart:math 数学和随机数 https://dart.cn/guides/libraries/library-tour#dartmath---math-and-random
+// dart:math API reference https://api.dart.cn/stable/dart-math/dart-math-library.html
+
+void trigonometry() {
+  //三角函数
+  assert(cos(pi) == -1.0);
+
+  var degrees = 30;
+  var radians = degrees * pi / 180; //弧度
+  var sinOf30degrees = sin(radians);
+  print('sin($degrees) = $sinOf30degrees');
+  assert((sinOf30degrees) - 0.5.abs() < 0.01);
+  //有误差，但是误差小于0.01
+}
+
+void addModify(String msg, var func) {
+  print('/' * 20 + '$msg' + '/' * 20);
+  func();
+  int len = 40 + (msg.length / 4 * 7).toInt();
+  print('/' * len);
+}
+
+void constValue() {
+  print(e);
+  print(pi);
+  print(sqrt2);
+}
+
+void randomValue() {
+  var random = Random();
+  print(random.nextInt(100));
+  print(random.nextDouble());
+  print(random.nextBool());
+}
+
+void learnMathLib() {
+  addModify('三角函数', trigonometry);
+  assert(max(1, 1000) == 1000);
+  assert(min(1, -1000) == -1000);
+  addModify('数学常数', constValue);
+  addModify('随机数', randomValue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//dart:convert 编解码JSON、UTF-8等 https://dart.cn/guides/libraries/library-tour#dartconvert---decoding-and-encoding-json-utf-8-and-more
+// dart:convert API reference https://api.dart.cn/stable/dart-convert/dart-convert-library.html
+
+Future<void> learnConvertLib() async {
+  //JSON https://dart.cn/guides/json
+  var jsonString = '''
+    [
+      {"score":40},
+      {"score":80}
+    ]
+  ''';
+  var scores = jsonDecode(jsonString);
+  assert(scores is List);
+  var firstScore = scores[0];
+  assert(firstScore is Map);
+  assert(firstScore['score'] == 40);
+  var json = {
+    'name': 'dart',
+    'age': 18,
+    'isStudent': true,
+    'friends': ['张三', '李四', '王五'],
+    'address': {'city': '北京', 'street': '东路'}
+  };
+  var jsonText = jsonEncode(json);
+  assert(jsonText ==
+      '{"name":"dart","age":18,"isStudent":true,"friends":["张三","李四","王五"],"address":{"city":"北京","street":"东路"}}');
+  //int,double,String,bool,null,List,Map都可以直接编码为JSON
+  //List和Map对象进行递归编码
+
+  //UTF-8编码和解码
+  List<int> utf8Bytes = [
+    0xc3,
+    0x8e,
+    0xc3,
+    0xb1,
+    0xc5,
+    0xa3,
+    0xc3,
+    0xa9,
+    0x72,
+    0xc3,
+    0xb1,
+    0xc3,
+    0xa5,
+    0xc5,
+    0xa3,
+    0xc3,
+    0xae,
+    0xc3,
+    0xb6,
+    0xc3,
+    0xb1,
+    0xc3,
+    0xa5,
+    0xc4,
+    0xbc,
+    0xc3,
+    0xae,
+    0xc5,
+    0xbe,
+    0xc3,
+    0xa5,
+    0xc5,
+    0xa3,
+    0xc3,
+    0xae,
+    0xe1,
+    0xbb,
+    0x9d,
+    0xc3,
+    0xb1
+  ];
+
+  var funnyWord = utf8.decode(utf8Bytes);
+
+  assert(funnyWord == 'Îñţérñåţîöñåļîžåţîờñ');
+
+  Stream<List<int>> inputStream = File('config').openRead();
+  var lines = utf8.decoder.bind(inputStream).transform(const LineSplitter());
+  try {
+    await for (final line in lines) {
+      print('Got ${line.length} characters from stream');
+    }
+  } catch (e) {
+    print('e');
+  }
+
+  List<int> encoded = utf8.encode('Îñţérñåţîöñåļîžåţîờñ');
+  assert(encoded.length == utf8Bytes.length);
+  for (int i = 0; i < encoded.length; i++) {
+    assert(encoded[i] == utf8Bytes[i]);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//dart:io 服务器和命令行应用程序的I/O https://dart.cn/guides/libraries/library-tour#dartio
+// dart:io API reference https://api.dart.cn/stable/dart-io/dart-io-library.html
+// 提供了处理files,directories,processes,sockets,WebSockets,and HTTP clients and servers的方法
+//          文件、目录、进程、套接字、Web套接字、HTTP客户端和服务器
+//只有在非web Flutter apps,命令行脚本和服务器程序上才能导入和使用dart:io包，在web apps上不行
+
+void filesAndDirectories() async {
+  //如果文件较大，应采取Stream的方式读取，比如上面的例子
+  // Files and directories https://dart.cn/guides/libraries/library-tour#files-and-directories
+
+  //Reading a file as text
+  var config = File('config');
+
+  var stringContents = await config.readAsString();
+  print('The file is ${stringContents.length} characters long');
+
+  var lines = await config.readAsLines();
+  print('The file has ${lines.length} lines');
+  print(lines);
+
+  //Reading a file as binary
+  var contents = await config.readAsBytes();
+  print('The file is ${contents.length} bytes long');
+
+  //Handling errors
+  try {
+    var contents = await File('config.txt').readAsString();
+    print(contents);
+  } catch (e) {
+    print(e);
+  }
+
+  //Streaming file contents
+  //Stream API https://dart.cn/guides/libraries/library-tour#stream
+  Stream<List<int>> inputStream = config.openRead();
+  var lines2 = utf8.decoder.bind(inputStream).transform(const LineSplitter());
+  try {
+    await for (final line in lines2) {
+      print('Got ${line.length} characters from stream');
+    }
+    print('file is now closed');
+  } catch (e) {
+    print(e);
+  }
+
+  //Writing to a file
+  var logFile = File('log');
+  if (!await logFile.exists()) {
+    logFile.create();
+  }
+  var sink = logFile.openWrite(mode: FileMode.append);
+  //sink.add(List<int>data);写二进制数据
+  sink.write('FILE ACCESSED ${DateTime.now()}\n');
+  await sink.flush();
+  await sink.close();
+
+  //Listing files in a directory
+  var dir = Directory('.');
+  try {
+    var dirList = dir.list();
+    await for (final FileSystemEntity f in dirList) {
+      if (f is File) {
+        print('Found file ${f.path}');
+      } else if (f is Directory) {
+        print('Found directory ${f.path}');
+      }
+    }
+  } catch (e) {
+    print(e.toString());
+  }
+  //create()创建文件或目录
+  //delete()删除文件或目录
+  //length()返回文件的字节数
+  assert(config.open(mode: FileMode.read) is Future<RandomAccessFile>);
+}
+
+void httpClientsAndServers() async {
+  // HTTP clients and servers https://dart.cn/guides/libraries/library-tour#http-clients-and-servers
+  // 可以用于获取HTTP资源，以及运行HTTP服务器
+
+  // HTTP server https://api.dart.cn/stable/dart-io/HttpServer-class.html
+  void processRequest(HttpRequest request) {
+    print('Got request for ${request.uri.path}');
+    print('method:${request.method} uri:${request.uri}');
+    final response = request.response;
+    if (request.uri.path == '/dart') {
+      response
+        ..headers.contentType = ContentType('text', 'plain', charset: 'utf-8')
+        ..write('Hello from the server');
+    } else {
+      response.statusCode = HttpStatus.notFound;
+    }
+    response.close();
+  }
+
+  Future startServer() async {
+    //因为这一个服务器是一直运行的，所以要单独开一个线程
+    final requests = await HttpServer.bind('localhost', 8888);
+    // 通常每个套接字地址(协议/网络地址/端口)只允许使用一次 https://blog.csdn.net/weixin_42070473/article/details/116494637
+    await for (final request in requests) {
+      processRequest(request);
+      break; //下面的客户端获取一次请求之后就停止循环，运行结束
+    }
+  }
+
+  startServer();
+
+  // Http client https://api.dart.cn/stable/dart-io/HttpClient-class.html
+  // 可以帮你获得HTTP资源，可以设置headers,use HTTP methods,read and write data
+  // 注：当使用Web App时，用dart:html HttpRequest class
+  var url = Uri.parse('http://localhost:8888/dart');
+  var httpClient = HttpClient();
+  var request = await httpClient.getUrl(url);
+  var response = await request.close();
+  var data = await utf8.decoder.bind(response).toList();
+  print('Response ${response.statusCode}:$data');
+  httpClient.close();
+}
+
+void learnIOLib() {
+  filesAndDirectories();
+  httpClientsAndServers();
 }
 
 void main() {
   learnCoreLib();
   learnAsyncLib();
+  learnMathLib();
+  learnConvertLib();
+  //本来应该是learn html的
+  //但是html和上面的代码不兼容
+  //所以将html和后面的HelloWeb合到一起了
+  learnIOLib(); //这一部分内容为教程中的内容
+  //命令行和服务器见03和04
+  //填写的为老师补充内容
 }
